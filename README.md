@@ -19,41 +19,60 @@ git clone https://github.com/brunoborges/jdx.git
 cd jdx
 ```
 
-2. **Build the Project**
+2. **Build the Distribution with Embedded Runtime**
 
 ```bash
-mvn clean package -DskipTests
+mvn clean package -DskipTests -Pjlink-runtime
 ```
 
-This creates a shaded JAR at `target/jdx-0.1.0-SNAPSHOT.jar` with all dependencies included.
+This creates a platform-specific distribution with an embedded Java runtime in:
+- `target/jdx-0.1.0-SNAPSHOT-{platform}.zip`
+- `target/jdx-0.1.0-SNAPSHOT-{platform}.tar.gz`
 
-3. **Create an Alias (Optional)**
+3. **Extract and Install**
 
-For convenience, create a shell alias or script:
-
-**Bash/Zsh:**
+**macOS/Linux:**
 ```bash
-# Add to ~/.bashrc or ~/.zshrc
-alias jdx='java -jar /path/to/jdx/target/jdx-0.1.0-SNAPSHOT.jar'
+# Extract the distribution
+cd target
+tar -xzf jdx-0.1.0-SNAPSHOT-*.tar.gz
+cd jdx-0.1.0-SNAPSHOT
+
+# Install to a standard location
+sudo mkdir -p /opt/jdx
+sudo cp -r . /opt/jdx/
+
+# Add to PATH (add this to your ~/.bashrc or ~/.zshrc)
+export PATH="/opt/jdx/bin:$PATH"
+
+# Or create a symlink
+sudo ln -s /opt/jdx/bin/jdx /usr/local/bin/jdx
 ```
 
-**Or create a script** at `/usr/local/bin/jdx`:
-```bash
-#!/bin/bash
-java -jar /path/to/jdx/target/jdx-0.1.0-SNAPSHOT.jar "$@"
-```
-```bash
-chmod +x /usr/local/bin/jdx
+**Windows:**
+```cmd
+# Extract the ZIP file
+# Copy to C:\Program Files\jdx
+# Add C:\Program Files\jdx\bin to your PATH environment variable
 ```
 
-4. **Discover Your JDKs**
+4. **Verify Installation**
+
+```bash
+jdx --help
+jdx --version
+```
+
+The `jdx` command now works independently of your system's Java installation!
+
+5. **Discover Your JDKs**
 
 ```bash
 jdx scan
 jdx list
 ```
 
-5. **Try It on a Maven Project**
+6. **Try It on a Maven Project**
 
 Navigate to any Maven project and configure it with jdx:
 
@@ -139,17 +158,9 @@ jdx doctor - Checking system configuration...
 
 This project requires JDK 25 to build.
 
-### Standard Build (JAR only)
+### Recommended: Build with Custom Runtime (jlink)
 
-```bash
-mvn clean package
-```
-
-The build will produce a shaded JAR with all dependencies included in `target/jdx-0.1.0-SNAPSHOT.jar`.
-
-### Build with Custom Runtime (jlink)
-
-To create a distribution with a custom Java runtime embedded:
+The recommended build creates a self-contained distribution with an embedded Java runtime:
 
 ```bash
 mvn clean package -Pjlink-runtime
@@ -165,25 +176,32 @@ This will:
 The resulting distribution includes:
 - `bin/` - Launcher scripts (`jdx` for Unix, `jdx.bat` for Windows)
 - `lib/` - Application JAR
-- `runtime/` - Custom Java runtime (when using `-Pjlink-runtime`)
+- `runtime/` - Custom Java runtime
 - Documentation files
 
 ### Benefits of jlink Distribution
 
-- **No JDK Required**: Users don't need Java installed
+- **No JDK Required**: The `jdx` command works independently of system Java installation
+- **Immune to JDK Switching**: Even when you switch JDKs with `jdx use`, the jdx tool itself keeps working
 - **Smaller Size**: Only includes required Java modules (~50-80MB vs full JDK)
 - **Faster Startup**: Optimized runtime with compressed modules
 - **Platform-Specific**: Each platform gets its own optimized runtime
 
-## Running
+### Alternative: Standard Build (JAR only)
 
-### From JAR
+If you just need the JAR for development/testing:
 
 ```bash
-java -jar target/jdx-0.1.0-SNAPSHOT.jar --help
+mvn clean package
 ```
 
-### From Distribution
+The build will produce a shaded JAR at `target/jdx-0.1.0-SNAPSHOT.jar`.
+
+**Note:** Running with `java -jar` requires Java to be available in your PATH and will break if you switch to an incompatible JDK version.
+
+## Running
+
+### From Distribution (Recommended)
 
 After extracting the ZIP/tar.gz:
 
@@ -195,6 +213,12 @@ After extracting the ZIP/tar.gz:
 **Windows:**
 ```cmd
 bin\jdx.bat --help
+```
+
+### From JAR (Development Only)
+
+```bash
+java -jar target/jdx-0.1.0-SNAPSHOT.jar --help
 ```
 
 ## Project Structure
