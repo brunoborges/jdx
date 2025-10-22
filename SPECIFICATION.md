@@ -205,23 +205,39 @@ telemetry:
 
 ### 11.3 Maven Toolchains
 
-- Ensure `~/.m2/toolchains.xml` exists. Insert a `<toolchain>` block per discovered version if missing. Do not remove user entries.
-- For project scope, generate `.mvn/jdx.toolchains.xml` and update POM only inside markers:
+- Ensure `~/.m2/toolchains.xml` exists. Insert a `<toolchain>` block per discovered JDK if missing. Do not remove user entries.
+- Each `<toolchain>` entry has:
+  - `<type>jdk</type>`
+  - `<provides>` with `<version>` (major version) and `<vendor>`
+  - `<configuration>` with `<jdkHome>` pointing to the JDK path
+- For project scope, jdx should update the `pom.xml` only inside markers:
 
 ```xml
 <!-- jdx:begin -->
 <plugin>
   <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-compiler-plugin</artifactId>
-  <version>3.13.0</version>
+  <artifactId>maven-toolchains-plugin</artifactId>
+  <version>3.2.0</version>
+  <executions>
+    <execution>
+      <goals>
+        <goal>toolchain</goal>
+      </goals>
+    </execution>
+  </executions>
   <configuration>
-    <release>${maven.compiler.release}</release>
+    <toolchains>
+      <jdk>
+        <version>17</version>
+      </jdk>
+    </toolchains>
   </configuration>
 </plugin>
 <!-- jdx:end -->
 ```
 
-plus a `maven.compiler.release` property if absent.
+- The `maven-toolchains-plugin` makes toolchain-aware plugins (compiler, surefire, javadoc, etc.) automatically use the configured JDK.
+- No need to configure `maven-compiler-plugin` separately - toolchain-aware plugins detect the toolchain automatically.
 
 ### 11.4 Gradle Toolchains
 

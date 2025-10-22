@@ -95,6 +95,9 @@ public class ToolchainManagerImpl implements ToolchainManager {
         
         Files.writeString(toolchainsPath, xml.toString());
         System.out.println("Updated Maven toolchains at: " + toolchainsPath);
+        
+        // Configure pom.xml with maven-toolchains-plugin if pom.xml exists
+        configurePomToolchainsPlugin(config);
     }
 
     private void configureGradleToolchains(ProjectConfig config) throws IOException {
@@ -154,5 +157,132 @@ public class ToolchainManagerImpl implements ToolchainManager {
         }
         
         return version;
+    }
+    
+    private void configurePomToolchainsPlugin(ProjectConfig config) throws IOException {
+        Path pomPath = Paths.get("pom.xml");
+        if (!Files.exists(pomPath)) {
+            System.out.println("No pom.xml found, skipping Maven toolchains plugin configuration.");
+            return;
+        }
+        
+        String pomContent = Files.readString(pomPath);
+        
+        // Check if jdx markers already exist
+        if (pomContent.contains("<!-- jdx:begin -->") && pomContent.contains("<!-- jdx:end -->")) {
+            // Update existing plugin configuration
+            pomContent = updateToolchainsPlugin(pomContent, config);
+        } else {
+            // Add new plugin configuration
+            pomContent = addToolchainsPlugin(pomContent, config);
+        }
+        
+        Files.writeString(pomPath, pomContent);
+        System.out.println("Updated pom.xml with maven-toolchains-plugin configuration");
+    }
+    
+    private String updateToolchainsPlugin(String pomContent, ProjectConfig config) {
+        int compileVersion = config.project().compile().release();
+        
+        String pluginConfig = String.format("""
+            <!-- jdx:begin -->
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-toolchains-plugin</artifactId>
+              <version>3.2.0</version>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>toolchain</goal>
+                  </goals>
+                </execution>
+              </executions>
+              <configuration>
+                <toolchains>
+                  <jdk>
+                    <version>%d</version>
+                  </jdk>
+                </toolchains>
+              </configuration>
+            </plugin>
+            <!-- jdx:end -->""", compileVersion);
+        
+        // Replace content between markers
+        int beginIndex = pomContent.indexOf("<!-- jdx:begin -->");
+        int endIndex = pomContent.indexOf("<!-- jdx:end -->") + "<!-- jdx:end -->".length();
+        
+        if (beginIndex >= 0 && endIndex > beginIndex) {
+            return pomContent.substring(0, beginIndex) + pluginConfig + pomContent.substring(endIndex);
+        }
+        
+        return pomContent;
+    }
+    
+    private String addToolchainsPlugin(String pomContent, ProjectConfig config) {
+        int compileVersion = config.project().compile().release();
+        
+        String pluginConfig = String.format("""
+                <!-- jdx:begin -->
+                <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-toolchains-plugin</artifactId>
+                  <version>3.2.0</version>
+                  <executions>
+                    <execution>
+                      <goals>
+                        <goal>toolchain</goal>
+                      </goals>
+                    </execution>
+                  </executions>
+                  <configuration>
+                    <toolchains>
+                      <jdk>
+                        <version>%d</version>
+                      </jdk>
+                    </toolchains>
+                  </configuration>
+                </plugin>
+                <!-- jdx:end -->
+            """, compileVersion);
+        
+        // Find <build><plugins> section or create it
+        if (pomContent.contains("<build>") && pomContent.contains("<plugins>")) {
+            // Insert after <plugins> tag
+            int pluginsIndex = pomContent.indexOf("<plugins>");
+            if (pluginsIndex >= 0) {
+                int insertPoint = pluginsIndex + "<plugins>".length();
+                return pomContent.substring(0, insertPoint) + "\n" + pluginConfig + pomContent.substring(insertPoint);
+            }
+        } else if (pomContent.contains("<build>")) {
+            // Insert <plugins> section inside <build>
+            int buildIndex = pomContent.indexOf("<build>");
+            if (buildIndex >= 0) {
+                int insertPoint = buildIndex + "<build>".length();
+                String pluginsSection = "\n    <plugins>\n" + pluginConfig + "\n    </plugins>\n  ";
+                return pomContent.substring(0, insertPoint) + pluginsSection + pomContent.substring(insertPoint);
+            }
+        } else {
+            // Add <build> section before </project>
+            int projectEndIndex = pomContent.lastIndexOf("</project>");
+            if (projectEndIndex >= 0) {
+                String buildSection = String.format("""
+                    
+                      <build>
+                        <plugins>
+                    %s
+                        </plugins>
+                      </build>
+                    
+                    """, pluginConfig);
+                return pomContent.substring(0, projectEndIndex) + buildSection + pomContent.substring(projectEndIndex);
+            }
+        }
+        
+        // If we couldn't insert, print a message
+        System.out.println("Could not automatically add maven-toolchains-plugin to pom.xml.");
+        System.out.println("Please manually add the following to your <build><plugins> section:");
+        System.out.println(pluginConfig);
+        
+        return pomContent;
     }
 }
