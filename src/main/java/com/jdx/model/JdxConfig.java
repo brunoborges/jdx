@@ -1,7 +1,5 @@
 package com.jdx.model;
 
-import java.util.List;
-
 /**
  * Represents the global jdx configuration stored in ~/.jdx/config.yaml
  */
@@ -11,11 +9,11 @@ public record JdxConfig(
     SafetyConfig safety,
     TelemetryConfig telemetry
 ) {
-    public record CatalogConfig(int autorefreshDays) {}
+    public record CatalogConfig(int autorefresh_days) {}
     
-    public record DefaultsConfig(String runtime, List<String> vendorPreference) {}
+    public record DefaultsConfig(String runtime, String[] vendor_preference) {}
     
-    public record SafetyConfig(boolean requireConfirmationOnPersist) {}
+    public record SafetyConfig(boolean require_confirmation_on_persist) {}
     
     public record TelemetryConfig(boolean enabled) {}
 }

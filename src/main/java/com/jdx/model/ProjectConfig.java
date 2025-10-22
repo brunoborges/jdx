@@ -1,23 +1,32 @@
 package com.jdx.model;
 
 /**
- * Represents the project-specific configuration stored in .jdxrc
+ * Represents the .jdxrc project configuration file.
  */
 public record ProjectConfig(
     int version,
-    Project project,
-    Tooling tooling,
+    ProjectSettings project,
+    ToolingSettings tooling,
     String notes
 ) {
-    public record Project(Runtime runtime, Compile compile) {}
+    public record ProjectSettings(
+        RuntimeSettings runtime,
+        CompileSettings compile
+    ) {}
     
-    public record Runtime(String require, String vendor) {}
+    public record RuntimeSettings(
+        String require,
+        String vendor
+    ) {}
     
-    public record Compile(int release, boolean enforce) {}
+    public record CompileSettings(
+        int release,
+        boolean enforce
+    ) {}
     
-    public record Tooling(Maven maven, Gradle gradle, boolean ideHint) {}
-    
-    public record Maven(boolean manageToolchains) {}
-    
-    public record Gradle(boolean manageToolchainBlock) {}
+    public record ToolingSettings(
+        boolean maven_manage_toolchains,
+        boolean gradle_manage_toolchain_block,
+        boolean ide_hint
+    ) {}
 }

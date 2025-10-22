@@ -1,22 +1,26 @@
 package com.jdx.toolchain;
 
+import com.jdx.model.ProjectConfig;
+
+import java.io.IOException;
+
 /**
  * Interface for managing Maven and Gradle toolchains.
  */
 public interface ToolchainManager {
     
     /**
-     * Configure toolchains for the specified JDK version.
+     * Configure toolchains based on project configuration.
      * 
-     * @param jdkVersion The JDK version to configure
-     * @param javaHome The JAVA_HOME path for the JDK
+     * @param config The project configuration
      */
-    void configure(String jdkVersion, String javaHome);
+    void configure(ProjectConfig config) throws IOException;
     
     /**
      * Verify that toolchains are correctly configured.
      * 
+     * @param config The project configuration
      * @return true if toolchains are valid, false otherwise
      */
-    boolean verify();
+    boolean verify(ProjectConfig config);
 }

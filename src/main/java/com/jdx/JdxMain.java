@@ -1,5 +1,6 @@
 package com.jdx;
 
+import com.jdx.commands.*;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
@@ -12,7 +13,18 @@ import picocli.CommandLine.Command;
     version = "jdx 0.1.0",
     description = "JDK Management CLI - Discover, manage, and switch JDKs",
     subcommands = {
-        // Subcommands will be added here as we implement them
+        ScanCommand.class,
+        ListCommand.class,
+        InfoCommand.class,
+        UseCommand.class,
+        DeactivateCommand.class,
+        PinCommand.class,
+        ApplyCommand.class,
+        VerifyCommand.class,
+        UndoCommand.class,
+        DetectForeignCommand.class,
+        ConfigCommand.class,
+        DoctorCommand.class
     }
 )
 public class JdxMain implements Runnable {

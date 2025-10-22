@@ -1,5 +1,7 @@
 package com.jdx.shell;
 
+import com.jdx.model.JdkInfo;
+
 /**
  * Interface for generating shell-specific activation scripts.
  */
@@ -8,10 +10,10 @@ public interface ShellActivation {
     /**
      * Generate activation script for the current shell.
      * 
-     * @param javaHome The JAVA_HOME path to activate
+     * @param jdk The JDK to activate
      * @return Shell-specific commands to set up the JDK
      */
-    String generateActivationScript(String javaHome);
+    String generateActivationScript(JdkInfo jdk);
     
     /**
      * Generate deactivation script for the current shell.
