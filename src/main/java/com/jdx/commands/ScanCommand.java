@@ -4,7 +4,6 @@ import com.jdx.catalog.JdkCatalogImpl;
 import com.jdx.discovery.JdkDiscoveryImpl;
 import com.jdx.model.JdkInfo;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -14,33 +13,24 @@ import java.util.concurrent.Callable;
     description = "Discover and catalog all JDKs on this machine"
 )
 public class ScanCommand implements Callable<Integer> {
-    
-    @Option(names = {"--verbose", "-v"}, description = "Show detailed scan progress")
-    private boolean verbose;
 
     @Override
     public Integer call() throws Exception {
-        if (verbose) {
-            System.out.println("Scanning for JDKs...");
-        }
+        System.out.println("Scanning for JDKs...");
 
         JdkDiscoveryImpl discovery = new JdkDiscoveryImpl();
         List<JdkInfo> jdks = discovery.scan();
 
-        if (verbose) {
-            System.out.println("Found " + jdks.size() + " JDK(s)");
-        }
+        System.out.println("Found " + jdks.size() + " JDK(s)");
 
         JdkCatalogImpl catalog = new JdkCatalogImpl();
         for (JdkInfo jdk : jdks) {
             catalog.add(jdk);
-            if (verbose) {
-                System.out.println("  - " + jdk.version() + " (" + jdk.vendor() + ") at " + jdk.path());
-            }
+            System.out.println("  - " + jdk.version() + " (" + jdk.vendor() + ") at " + jdk.path());
         }
 
         catalog.save();
-        
+
         System.out.println("Scan complete. Found " + jdks.size() + " JDK(s).");
         System.out.println("Run 'jdx list' to see details.");
 
