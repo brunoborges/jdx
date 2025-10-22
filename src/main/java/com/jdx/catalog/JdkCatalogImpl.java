@@ -117,8 +117,6 @@ public class JdkCatalogImpl implements JdkCatalog {
     private static class CatalogData {
         public List<JdkInfo> jdks;
 
-        public CatalogData() {}
-
         public CatalogData(List<JdkInfo> jdks) {
             this.jdks = jdks;
         }

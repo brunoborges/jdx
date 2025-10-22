@@ -1,21 +1,21 @@
 package com.jdx.commands;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jdx.catalog.JdkCatalogImpl;
 import com.jdx.model.JdkInfo;
 import com.jdx.model.ProjectConfig;
 import com.jdx.toolchain.ToolchainManagerImpl;
+
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Callable;
 
 @Command(
     name = "pin",

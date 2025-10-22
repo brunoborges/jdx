@@ -1,15 +1,13 @@
 package com.jdx.commands;
 
-import picocli.CommandLine.Command;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+
+import picocli.CommandLine.Command;
 
 @Command(
     name = "detect-foreign",

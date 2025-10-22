@@ -1,16 +1,16 @@
 package com.jdx.commands;
 
-import com.jdx.catalog.JdkCatalogImpl;
-import com.jdx.model.JdkInfo;
-import com.jdx.shell.ShellActivationImpl;
-import com.jdx.shell.ShellType;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+
+import com.jdx.catalog.JdkCatalogImpl;
+import com.jdx.model.JdkInfo;
+import com.jdx.shell.ShellActivationImpl;
+
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 
 @Command(
     name = "use",

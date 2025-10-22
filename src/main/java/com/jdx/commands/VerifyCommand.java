@@ -1,18 +1,18 @@
 package com.jdx.commands;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.jdx.model.ProjectConfig;
-import com.jdx.toolchain.ToolchainManagerImpl;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.Callable;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.jdx.model.ProjectConfig;
+
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 @Command(
     name = "verify",
