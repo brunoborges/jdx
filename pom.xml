@@ -233,7 +233,7 @@
                                         <argument>--strip-debug</argument>
                                         <argument>--no-header-files</argument>
                                         <argument>--no-man-pages</argument>
-                                        <argument>--compress=2</argument>
+                                        <argument>--compress=zip-9</argument>
                                         <argument>--output</argument>
                                         <argument>${project.build.directory}/jlink-runtime</argument>
                                     </arguments>

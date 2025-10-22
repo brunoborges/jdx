@@ -285,7 +285,7 @@ tasks.withType(JavaCompile).configureEach {
 
 ## 16. Observability
 
-- `--verbose` shows every decision and file touched.
+- `scan` is always verbose and shows every decision and file touched.
 - `JDX_LOG=debug` env var for support cases.
 - `jdx doctor` prints an actionable report with red or green checks.
 
@@ -348,7 +348,7 @@ jdx verify || exit 1
 	•	Offer a one time shim bypass: jdx exec -- mvn -version runs with the selected JAVA_HOME for the child process only.
 
 16) Observability
-	•	--verbose shows every decision and file touched.
+    •	scan shows every decision and file touched.
 	•	JDX_LOG=debug env var for support cases.
 	•	jdx doctor prints an actionable report with red or green checks.
 
