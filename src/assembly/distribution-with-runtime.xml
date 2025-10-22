@@ -1,0 +1,52 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 http://maven.apache.org/xsd/assembly-2.2.0.xsd">
+    <id>distribution-with-runtime</id>
+    <formats>
+        <format>zip</format>
+        <format>tar.gz</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory>jdx-${project.version}</baseDirectory>
+    
+    <fileSets>
+        <!-- Include the shaded JAR -->
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>jdx-${project.version}.jar</include>
+            </includes>
+        </fileSet>
+        
+        <!-- Include the jlink runtime -->
+        <fileSet>
+            <directory>${project.build.directory}/jlink-runtime</directory>
+            <outputDirectory>runtime</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        
+        <!-- Include documentation -->
+        <fileSet>
+            <directory>${project.basedir}</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>README.md</include>
+                <include>SPECIFICATION.md</include>
+                <include>CONTRIBUTING.md</include>
+                <include>LICENSE*</include>
+            </includes>
+        </fileSet>
+        
+        <!-- Include launch scripts -->
+        <fileSet>
+            <directory>${project.basedir}/src/scripts</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>jdx</include>
+                <include>jdx.bat</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>
