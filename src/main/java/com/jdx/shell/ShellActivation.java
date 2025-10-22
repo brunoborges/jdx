@@ -16,13 +16,6 @@ public interface ShellActivation {
     String generateActivationScript(JdkInfo jdk);
     
     /**
-     * Generate deactivation script for the current shell.
-     * 
-     * @return Shell-specific commands to restore previous state
-     */
-    String generateDeactivationScript();
-    
-    /**
      * Get the type of shell this activation is for.
      */
     ShellType getShellType();

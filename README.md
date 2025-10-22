@@ -266,7 +266,6 @@ See [SPECIFICATION.md](SPECIFICATION.md) for the complete product specification 
 | `jdx list` | List all discovered JDKs (use `--json` for JSON output) |
 | `jdx info <id>` | Show detailed information about a specific JDK |
 | `jdx use <id>` | Generate shell activation script for a JDK |
-| `jdx deactivate` | Restore previous JAVA_HOME and PATH |
 | `jdx pin` | Pin runtime and/or compile JDK versions (creates/updates `.jdxrc`) |
 | `jdx apply` | Apply `.jdxrc` configuration to current environment |
 | `jdx verify` | Verify JDK and toolchain configuration |

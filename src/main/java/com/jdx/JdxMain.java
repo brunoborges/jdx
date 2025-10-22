@@ -17,7 +17,6 @@ import picocli.CommandLine.Command;
         ListCommand.class,
         InfoCommand.class,
         UseCommand.class,
-        DeactivateCommand.class,
         PinCommand.class,
         ApplyCommand.class,
         VerifyCommand.class,

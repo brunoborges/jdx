@@ -26,17 +26,6 @@ public class ShellActivationImpl implements ShellActivation {
     }
 
     @Override
-    public String generateDeactivationScript() {
-        ShellType shellType = getShellType();
-        
-        return switch (shellType) {
-            case BASH, ZSH, FISH -> generatePosixDeactivation();
-            case POWERSHELL -> generatePowerShellDeactivation();
-            case CMD -> generateCmdDeactivation();
-        };
-    }
-
-    @Override
     public ShellType getShellType() {
         String shell = System.getenv("SHELL");
         if (shell == null) {
@@ -109,48 +98,6 @@ public class ShellActivationImpl implements ShellActivation {
         sb.append("set PATH=").append(jdk.path()).append("\\bin;%PATH%\n");
         
         return sb.toString();
-    }
-
-    private String generatePosixDeactivation() {
-        StringBuilder sb = new StringBuilder();
-        
-        sb.append("# Restore previous JAVA_HOME and PATH\n");
-        sb.append("if [ -n \"$JDX_PREV_JAVA_HOME\" ]; then\n");
-        sb.append("  export JAVA_HOME=\"$JDX_PREV_JAVA_HOME\"\n");
-        sb.append("  unset JDX_PREV_JAVA_HOME\n");
-        sb.append("else\n");
-        sb.append("  unset JAVA_HOME\n");
-        sb.append("fi\n");
-        sb.append("\n");
-        sb.append("if [ -n \"$JDX_PREV_PATH\" ]; then\n");
-        sb.append("  export PATH=\"$JDX_PREV_PATH\"\n");
-        sb.append("  unset JDX_PREV_PATH\n");
-        sb.append("fi\n");
-        
-        return sb.toString();
-    }
-
-    private String generatePowerShellDeactivation() {
-        StringBuilder sb = new StringBuilder();
-        
-        sb.append("# Restore previous JAVA_HOME and PATH\n");
-        sb.append("if ($env:JDX_PREV_JAVA_HOME) {\n");
-        sb.append("  $env:JAVA_HOME = $env:JDX_PREV_JAVA_HOME\n");
-        sb.append("  Remove-Item Env:\\JDX_PREV_JAVA_HOME\n");
-        sb.append("} else {\n");
-        sb.append("  Remove-Item Env:\\JAVA_HOME -ErrorAction SilentlyContinue\n");
-        sb.append("}\n");
-        sb.append("\n");
-        sb.append("if ($env:JDX_PREV_PATH) {\n");
-        sb.append("  $env:PATH = $env:JDX_PREV_PATH\n");
-        sb.append("  Remove-Item Env:\\JDX_PREV_PATH\n");
-        sb.append("}\n");
-        
-        return sb.toString();
-    }
-
-    private String generateCmdDeactivation() {
-        return "@echo off\nREM Deactivation not fully supported in CMD\n";
     }
 
     public void persistActivation(JdkInfo jdk) throws IOException {

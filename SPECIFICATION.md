@@ -76,7 +76,6 @@ A cross platform CLI that discovers all JDKs on a machine, lets users switch the
   - Never mutates system wide PATH by default. Offer `--persist` to write user profile snippets:
     - bash/zsh: `~/.jdx/activate.sh` and note to source in `~/.zshrc`.
     - PowerShell: add to CurrentUser profile after confirmation.
-- `jdx deactivate` restores previous `JAVA_HOME` and PATH for this shell.
 
 ### 7.4 Project Pinning
 
@@ -135,7 +134,6 @@ jdx
   list [--json]                      # list catalog
   info <id|version>
   use <id|version> [--shell] [--persist] [--dry-run]
-  deactivate
   pin [--runtime <ver>] [--compile <ver>] [--vendor <name>] [--project-dir <dir>]
   apply [--strict]                   # apply .jdxrc
   verify [--maven] [--gradle] [--ide]
