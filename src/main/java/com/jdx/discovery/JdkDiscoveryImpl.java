@@ -249,8 +249,8 @@ public class JdkDiscoveryImpl implements JdkDiscovery {
             if (hasJlink) capabilities.add("jlink");
             if (hasJpackage) capabilities.add("jpackage");
             
-            // Generate ID from path (use last directory name)
-            String id = jdkPath.getFileName().toString();
+            // Generate ID from path - create a meaningful unique identifier
+            String id = generateId(jdkPath, version, vendor);
             
             return Optional.of(new JdkInfo(
                 id,
@@ -265,4 +265,74 @@ public class JdkDiscoveryImpl implements JdkDiscovery {
             return Optional.empty();
         }
     }
+    
+    /**
+     * Generate a unique, meaningful ID for a JDK.
+     * Examples:
+     * - java-21 (for JDK 21)
+     * - java-17.0.9 (for JDK 17.0.9)
+     * - java-11-temurin (if multiple JDK 11s exist)
+     */
+    private String generateId(Path jdkPath, String version, String vendor) {
+        // Extract major version for cleaner IDs
+        String majorVersion = extractMajorVersion(version);
+        
+        // Check for common patterns in path that indicate a unique identifier
+        String pathStr = jdkPath.toString();
+        
+        // For SDKMAN paths like ~/.sdkman/candidates/java/21.0.1-tem
+        if (pathStr.contains("/.sdkman/")) {
+            String[] parts = pathStr.split("/");
+            for (int i = 0; i < parts.length; i++) {
+                if (parts[i].equals("java") && i + 1 < parts.length) {
+                    return parts[i + 1]; // Return the SDKMAN identifier
+                }
+            }
+        }
+        
+        // For jenv paths like ~/.jenv/versions/21.0.1
+        if (pathStr.contains("/.jenv/")) {
+            String[] parts = pathStr.split("/");
+            for (int i = 0; i < parts.length; i++) {
+                if (parts[i].equals("versions") && i + 1 < parts.length) {
+                    return parts[i + 1];
+                }
+            }
+        }
+        
+        // For standard paths, use vendor-version pattern
+        // Extract short vendor name
+        String shortVendor = vendor.toLowerCase()
+            .replace("microsoft build of openjdk", "microsoft")
+            .replace("eclipse adoptium", "temurin")
+            .replace("oracle corporation", "oracle")
+            .split(" ")[0];
+        
+        // Create ID: vendor-majorVersion (e.g., microsoft-21, temurin-17)
+        return shortVendor + "-" + majorVersion;
+    }
+    
+    /**
+     * Extract major version from full version string.
+     * Examples: "21.0.1" -> "21", "17.0.9" -> "17", "1.8.0_392" -> "8"
+     */
+    private String extractMajorVersion(String version) {
+        // Remove quotes if present
+        version = version.replaceAll("^\"|\"$", "");
+        
+        // Handle 1.8 format
+        if (version.startsWith("1.8")) {
+            return "8";
+        }
+        
+        // Extract first number
+        int dotIndex = version.indexOf('.');
+        if (dotIndex > 0) {
+            return version.substring(0, dotIndex);
+        }
+        
+        // If no dot, return as-is (handle cases like "21")
+        return version.split("[^0-9]")[0];
+    }
 }
+
