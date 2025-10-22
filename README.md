@@ -80,7 +80,7 @@ Navigate to any Maven project and configure it with jdx:
 cd /path/to/your/maven-project
 
 # Pin a runtime JDK for your project
-jdx pin --project --runtime 21
+jdx pin --runtime 21
 
 # Check the generated .jdxrc file
 cat .jdxrc
@@ -127,9 +127,9 @@ $ eval "$(jdx use java-17)"
 $ java -version
 openjdk version "17.0.9"
 
-# Pin a JDK for a project
+# Pin runtime and compile targets for a project
 $ cd my-project
-$ jdx pin --project --runtime 21 --compile 17
+$ jdx pin --runtime 21 --compile 17
 Created/updated .jdxrc
 
 # Apply project configuration
@@ -267,7 +267,7 @@ See [SPECIFICATION.md](SPECIFICATION.md) for the complete product specification 
 | `jdx info <id>` | Show detailed information about a specific JDK |
 | `jdx use <id>` | Generate shell activation script for a JDK |
 | `jdx deactivate` | Restore previous JAVA_HOME and PATH |
-| `jdx pin` | Pin JDK versions for project scope (creates `.jdxrc`) |
+| `jdx pin` | Pin runtime and/or compile JDK versions (creates/updates `.jdxrc`) |
 | `jdx apply` | Apply `.jdxrc` configuration to current environment |
 | `jdx verify` | Verify JDK and toolchain configuration |
 | `jdx config` | Get or set global configuration values |
@@ -286,7 +286,7 @@ cd /path/to/your/maven-project
 jdx scan
 
 # Pin a runtime and compile version
-jdx pin --project --runtime 21 --compile 17
+jdx pin --runtime 21 --compile 17
 
 # This creates a .jdxrc file in your project root
 cat .jdxrc
@@ -329,11 +329,30 @@ tooling:
 notes: "This file is maintained by jdx."
 ```
 
-- **runtime.require**: The JDK version to use when running the application
-- **compile.release**: The Java version to compile to (bytecode level)
+- **runtime.require**: JDK used to RUN the application, tests, and build tools
+- **compile.release**: Java feature level to COMPILE TO (javac --release / bytecode)
 - **maven_manage_toolchains**: Automatically update `~/.m2/toolchains.xml`
 - **gradle_manage_toolchain_block**: Automatically update `gradle/jdx.gradle`
 
 ## License
 
 Apache License 2.0 - See [LICENSE](LICENSE) file for details.
+
+### Additional Pin Examples
+
+```bash
+# Pin just the compile target (build for 17, run on current active runtime)
+jdx pin --compile 17
+
+# Pin only the runtime (keep existing compile target)
+jdx pin --runtime 21
+
+# Pin both runtime (21) and compile target (17)
+jdx pin --runtime 21 --compile 17
+
+# Pin for a different project directory
+jdx pin --project-dir ../another-project --runtime 21
+
+# Dry run (show changes without writing files)
+jdx pin --runtime 21 --compile 17 --dry-run
+```

@@ -5,6 +5,8 @@ import com.jdx.model.JdkInfo;
 import com.jdx.model.ProjectConfig;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -93,6 +95,18 @@ public class ToolchainManagerImpl implements ToolchainManager {
         
         xml.append("</toolchains>\n");
         
+        // Backup existing toolchains.xml if present
+        if (Files.exists(toolchainsPath)) {
+            String timestamp = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now());
+            Path backup = m2Path.resolve("toolchains.xml.bak." + timestamp);
+            try {
+                Files.copy(toolchainsPath, backup);
+                System.out.println("Created backup: " + backup);
+            } catch (IOException ioe) {
+                System.err.println("Warning: failed to create backup of toolchains.xml: " + ioe.getMessage());
+            }
+        }
+
         Files.writeString(toolchainsPath, xml.toString());
         System.out.println("Updated Maven toolchains at: " + toolchainsPath);
         

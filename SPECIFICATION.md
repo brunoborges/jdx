@@ -45,7 +45,7 @@ A cross platform CLI that discovers all JDKs on a machine, lets users switch the
 
 1. As a dev, I want to run `jdx scan` and see all JDKs on my machine with clear versions and paths.
 2. As a dev, I want `jdx use 17` to make `java -version` show 17 in my shell, without breaking other shells.
-3. As a build owner, I want `jdx pin --project --compile 8` to configure Maven and Gradle to compile for 8 even if I run them on 21.
+3. As a build owner, I want `jdx pin --compile 8` to configure Maven and Gradle to compile for 8 even if I run them on 21 (with a backup of existing toolchains.xml).
 4. As a lead, I want a repo to declare its requirements so new contributors run `jdx apply` and are ready in seconds.
 5. As a CI owner, I want `jdx verify` to fail fast when the environment is wrong.
 6. As a Windows user, I want this to work in PowerShell and cmd the same way it works in bash and zsh.
@@ -80,8 +80,10 @@ A cross platform CLI that discovers all JDKs on a machine, lets users switch the
 
 ### 7.4 Project Pinning
 
-- `jdx pin --project --runtime <ver>` writes `.jdxrc` with the JDK to run tools.
-- `jdx pin --project --compile <ver>` updates:
+- `jdx pin --runtime <ver>` writes/updates `.jdxrc` runtime section (JDK used to run the app, tests, tools).
+- `jdx pin --compile <ver>` writes/updates compile section (javac --release / bytecode target) and updates toolchains (creating a timestamped backup if `~/.m2/toolchains.xml` exists).
+- `jdx pin --runtime 21 --compile 17` pins runtime 21, compile target 17 (builds for 17, executes on 21).
+- `jdx pin --project-dir ../other --runtime 21` targets a different project path.
   - **Maven**: writes `~/.m2/toolchains.xml` entry if missing and injects minimal POM plugin config with `<release>` suggestion to user. Project local: optional `.mvn/jdx.toolchains.xml` plus a `jdx-maven-toolchains.xml` include pattern, with instructions. We will not overwrite existing toolchains, we append and create if absent.
   - **Gradle**: adds or updates `gradle.properties` with `org.gradle.java.home` for runtime, and `build.gradle[.kts]` toolchain block for compile language level. If editing source files is not allowed, we generate a `gradle/jdx.gradle` applied from `settings.gradle`.
 - `jdx apply` reads `.jdxrc` and sets the current shell and toolchains accordingly.
@@ -129,18 +131,18 @@ A cross platform CLI that discovers all JDKs on a machine, lets users switch the
 
 ```
 jdx
-  scan                         # discover JDKs
-  list [--json]                # list catalog
+  scan                               # discover JDKs
+  list [--json]                      # list catalog
   info <id|version>
   use <id|version> [--shell] [--persist] [--dry-run]
   deactivate
-  pin --project [--runtime <ver>] [--compile <ver>] [--vendor <name>]
-  apply [--strict]             # apply .jdxrc
+  pin [--runtime <ver>] [--compile <ver>] [--vendor <name>] [--project-dir <dir>]
+  apply [--strict]                   # apply .jdxrc
   verify [--maven] [--gradle] [--ide]
   undo
-  detect-foreign               # jenv/sdkman/etc
-  config [get|set] <key> [val] # global config in ~/.jdx/config.yaml
-  doctor                       # common problems and fixes
+  detect-foreign                     # jenv/sdkman/etc
+  config [get|set] <key> [val]       # global config in ~/.jdx/config.yaml
+  doctor                             # common problems and fixes
 ```
 
 **Exit codes:**
@@ -332,7 +334,7 @@ mvn -q -DskipTests package
 ### 19.2 Add compile level to an existing repo
 
 ```bash
-jdx pin --project --compile 8
+jdx pin --compile 8
 jdx verify
 ```
 
@@ -390,7 +392,7 @@ mvn -q -DskipTests package
 
 19.2 Add compile level to an existing repo
 
-jdx pin --project --compile 8
+jdx pin --compile 8
 jdx verify
 
 19.3 Switch runtime JDK for troubleshooting
@@ -413,7 +415,7 @@ jdx verify || exit 1
 
 **Acceptance criteria for MVP:**
 
-- `scan`, `list`, `use --shell`, `pin --project --compile`, `verify` working on Windows, macOS, Linux.
+- `scan`, `list`, `use --shell`, `pin --compile`, `verify` working on Windows, macOS, Linux.
 - Maven Toolchains generated or appended safely.
 - Gradle Toolchains configured without breaking existing builds.
 - At least one Windows shell (PowerShell) and one POSIX shell (zsh) persisted activation working.
@@ -456,7 +458,7 @@ If you want, I can convert this into a README style document with command exampl
 	•	Ide hint snapshot tests for IntelliJ, VS Code.
 
 Acceptance criteria for MVP:
-	•	scan, list, use --shell, pin --project --compile, verify working on Windows, macOS, Linux.
+  •	scan, list, use --shell, pin --compile, verify working on Windows, macOS, Linux.
 	•	Maven Toolchains generated or appended safely.
 	•	Gradle Toolchains configured without breaking existing builds.
 	•	At least one Windows shell (PowerShell) and one POSIX shell (zsh) persisted activation working.
@@ -471,7 +473,7 @@ Acceptance criteria for MVP:
 
 MVP
 	•	Discovery, list, use in current shell.
-	•	Project pin compile level for Maven and Gradle.
+  •	Project pin compile level for Maven and Gradle (with safe toolchains.xml backup).
 	•	Verify and doctor.
 	•	Respect mode for existing managers.
 
