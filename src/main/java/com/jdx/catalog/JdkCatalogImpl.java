@@ -117,6 +117,10 @@ public class JdkCatalogImpl implements JdkCatalog {
     private static class CatalogData {
         public List<JdkInfo> jdks;
 
+        // This constructor is used through reflection
+        @SuppressWarnings("unused")
+        public CatalogData() {}
+
         public CatalogData(List<JdkInfo> jdks) {
             this.jdks = jdks;
         }
