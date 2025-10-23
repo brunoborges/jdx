@@ -262,6 +262,7 @@ See [SPECIFICATION.md](SPECIFICATION.md) for the complete product specification 
 
 | Command | Description |
 |---------|-------------|
+| `jdx help [command]` | Display help information (general or for a specific command) |
 | `jdx scan` | Discover and catalog all JDKs on this machine |
 | `jdx list` | List all discovered JDKs (use `--json` for JSON output) |
 | `jdx info <id>` | Show detailed information about a specific JDK |

@@ -13,6 +13,7 @@ import picocli.CommandLine.Command;
     version = "jdx 0.1.0",
     description = "JDK Management CLI - Discover, manage, and switch JDKs",
     subcommands = {
+        HelpCommand.class,
         ScanCommand.class,
         ListCommand.class,
         InfoCommand.class,

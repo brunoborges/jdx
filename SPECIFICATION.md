@@ -130,6 +130,7 @@ A cross platform CLI that discovers all JDKs on a machine, lets users switch the
 
 ```
 jdx
+  help [<command>]                   # show general help or help for a specific command
   scan                               # discover JDKs
   list [--json]                      # list catalog
   info <id|version>
