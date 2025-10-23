@@ -83,6 +83,28 @@
 
     <build>
         <plugins>
+    <!-- jdx:begin -->
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-toolchains-plugin</artifactId>
+  <version>3.2.0</version>
+  <executions>
+    <execution>
+      <goals>
+        <goal>toolchain</goal>
+      </goals>
+    </execution>
+  </executions>
+  <configuration>
+    <toolchains>
+      <jdk>
+        <version>17</version>
+      </jdk>
+    </toolchains>
+  </configuration>
+</plugin>
+<!-- jdx:end -->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
