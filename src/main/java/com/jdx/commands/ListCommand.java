@@ -39,24 +39,16 @@ public class ListCommand implements Callable<Integer> {
             System.out.println("]");
         } else {
             // Table format
-            System.out.printf("%-30s %-15s %-20s %-12s %-10s %-60s%n",
-                "ID", "VERSION", "VENDOR", "ARCH", "STATUS", "PATH");
+            System.out.printf("%-30s %-15s %-20s %-80s%n",
+                "ID", "VERSION", "VENDOR", "PATH");
             System.out.println("-".repeat(150));
             
             for (JdkInfo jdk : jdks) {
-                String capabilities = String.join(",", jdk.capabilities());
-                if (!capabilities.isEmpty()) {
-                    capabilities = " [" + capabilities + "]";
-                }
-                
-                System.out.printf("%-30s %-15s %-20s %-12s %-10s %-60s%s%n",
+                System.out.printf("%-30s %-15s %-20s %-80s%n",
                     jdk.id(),
                     jdk.version(),
                     truncate(jdk.vendor(), 20),
-                    jdk.arch(),
-                    jdk.valid() ? "✓ valid" : "✗ broken",
-                    truncate(jdk.path(), 60),
-                    capabilities);
+                    truncate(jdk.path(), 80));
             }
             
             System.out.println("\nTotal: " + jdks.size() + " JDK(s)");
