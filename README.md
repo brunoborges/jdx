@@ -98,17 +98,22 @@ mvn clean install
 ### Example Workflow
 
 ```bash
-# Discover all JDKs on your system
+# Discover all JDKs on your system (standard scan)
 $ jdx scan
 Scan complete. Found 5 JDK(s).
 
+# Discover JDKs with deep scan (searches beyond standard locations)
+$ jdx scan --deep
+Scanning for JDK installations (deep scan)...
+Found 11 JDK(s).
+
 # List discovered JDKs
 $ jdx list
-ID         VERSION    VENDOR       ARCH      STATUS    PATH
+ID         VERSION    VENDOR       PATH
 -------------------------------------------------------------------------
-java-21    21.0.1     Temurin      aarch64   ✓ valid   /Library/Java/...
-java-17    17.0.9     Temurin      aarch64   ✓ valid   /Library/Java/...
-java-11    11.0.21    Microsoft    aarch64   ✓ valid   /Library/Java/...
+java-21    21.0.1     Temurin      /Library/Java/...
+java-17    17.0.9     Temurin      /Library/Java/...
+java-11    11.0.21    Microsoft    /Library/Java/...
 
 # Get detailed info about a specific JDK
 $ jdx info java-21
@@ -263,7 +268,7 @@ See [SPECIFICATION.md](SPECIFICATION.md) for the complete product specification 
 | Command | Description |
 |---------|-------------|
 | `jdx help [command]` | Display help information (general or for a specific command) |
-| `jdx scan` | Discover and catalog all JDKs on this machine |
+| `jdx scan [--deep]` | Discover and catalog all JDKs on this machine (use `--deep` for extensive search) |
 | `jdx list` | List all discovered JDKs (use `--json` for JSON output) |
 | `jdx info <id>` | Show detailed information about a specific JDK |
 | `jdx use <id>` | Generate shell activation script for a JDK |

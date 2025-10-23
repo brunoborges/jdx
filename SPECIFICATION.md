@@ -54,10 +54,17 @@ A cross platform CLI that discovers all JDKs on a machine, lets users switch the
 
 ### 7.1 Discovery
 
-- `jdx scan`
-  - **Windows**: search registry `HKLM\Software\JavaSoft\JDK`, `HKCU`, common install dirs under `C:\Program Files\Java\`, `C:\Program Files\Microsoft\jdk\`, checks PATH hits like `where java`, inspects `java -XshowSettings:properties`.
-  - **macOS**: query `/usr/libexec/java_home -V` and canonical locations in `/Library/Java/JavaVirtualMachines/*.jdk/Contents/Home`.
-  - **Linux**: check `/usr/lib/jvm/*`, `update-alternatives --display java`, PATH hits via `which -a java`.
+- `jdx scan [--deep]`
+  - **Standard scan** (default):
+    - **Windows**: search registry `HKLM\Software\JavaSoft\JDK`, `HKCU`, common install dirs under `C:\Program Files\Java\`, `C:\Program Files\Microsoft\jdk\`, checks PATH hits like `where java`, inspects `java -XshowSettings:properties`.
+    - **macOS**: query `/usr/libexec/java_home -V` and canonical locations in `/Library/Java/JavaVirtualMachines/*.jdk/Contents/Home`.
+    - **Linux**: check `/usr/lib/jvm/*`, `update-alternatives --display java`, PATH hits via `which -a java`.
+  - **Deep scan** (`--deep`):
+    - Searches beyond standard locations, including:
+      - User home directories: `~/.sdkman/candidates/java`, `~/.jenv/versions`, `~/jdks`
+      - System directories: `/opt`, `/usr/local`, `/usr/java` (Linux/macOS)
+      - Additional Windows drives (C:\ through Z:\)
+    - Scans recursively up to 3 levels deep to discover JDKs in non-standard locations.
   - Parse release file to capture `JAVA_VERSION`, `IMPLEMENTOR`, `OS_ARCH`.
   - Persist results to the Catalog. Never auto modify PATH.
 

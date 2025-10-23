@@ -29,14 +29,23 @@ public class JdkDiscoveryImpl implements JdkDiscovery {
 
     @Override
     public List<JdkInfo> scan() {
+        return scan(false);
+    }
+    
+    @Override
+    public List<JdkInfo> deepScan() {
+        return scan(true);
+    }
+    
+    private List<JdkInfo> scan(boolean deep) {
         Set<JdkInfo> jdks = new LinkedHashSet<>();
         
         if (IS_MAC) {
-            jdks.addAll(scanMacOS());
+            jdks.addAll(scanMacOS(deep));
         } else if (IS_WINDOWS) {
-            jdks.addAll(scanWindows());
+            jdks.addAll(scanWindows(deep));
         } else if (IS_LINUX) {
-            jdks.addAll(scanLinux());
+            jdks.addAll(scanLinux(deep));
         }
         
         // Also check JAVA_HOME
@@ -51,7 +60,7 @@ public class JdkDiscoveryImpl implements JdkDiscovery {
         return new ArrayList<>(jdks);
     }
 
-    private List<JdkInfo> scanMacOS() {
+    private List<JdkInfo> scanMacOS(boolean deep) {
         List<JdkInfo> jdks = new ArrayList<>();
         
         // Use /usr/libexec/java_home -V
@@ -97,10 +106,26 @@ public class JdkDiscoveryImpl implements JdkDiscovery {
             }
         }
         
+        // Deep scan: check additional locations
+        if (deep) {
+            // Check user home directories
+            String home = System.getProperty("user.home");
+            scanDirectory(Paths.get(home, ".sdkman", "candidates", "java"), jdks);
+            scanDirectory(Paths.get(home, ".jenv", "versions"), jdks);
+            scanDirectory(Paths.get(home, "Library", "Java", "JavaVirtualMachines"), jdks);
+            scanDirectory(Paths.get(home, "jdks"), jdks);
+            
+            // Check /opt
+            scanDirectory(Paths.get("/opt"), jdks);
+            
+            // Check /usr/local
+            scanDirectory(Paths.get("/usr/local"), jdks);
+        }
+        
         return jdks;
     }
 
-    private List<JdkInfo> scanWindows() {
+    private List<JdkInfo> scanWindows(boolean deep) {
         List<JdkInfo> jdks = new ArrayList<>();
         
         // Check common install directories
@@ -157,10 +182,27 @@ public class JdkDiscoveryImpl implements JdkDiscovery {
             // Ignore
         }
         
+        // Deep scan: check additional locations
+        if (deep) {
+            String home = System.getProperty("user.home");
+            scanDirectory(Paths.get(home, ".sdkman", "candidates", "java"), jdks);
+            scanDirectory(Paths.get(home, ".jenv", "versions"), jdks);
+            scanDirectory(Paths.get(home, "jdks"), jdks);
+            
+            // Check other drives
+            for (char drive = 'C'; drive <= 'Z'; drive++) {
+                Path drivePath = Paths.get(drive + ":\\");
+                if (Files.exists(drivePath)) {
+                    scanDirectory(drivePath.resolve("jdk"), jdks);
+                    scanDirectory(drivePath.resolve("Java"), jdks);
+                }
+            }
+        }
+        
         return jdks;
     }
 
-    private List<JdkInfo> scanLinux() {
+    private List<JdkInfo> scanLinux(boolean deep) {
         List<JdkInfo> jdks = new ArrayList<>();
         
         // Check /usr/lib/jvm
@@ -210,6 +252,21 @@ public class JdkDiscoveryImpl implements JdkDiscovery {
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             // Ignore
+        }
+        
+        // Deep scan: check additional locations
+        if (deep) {
+            scanDirectory(Paths.get(home, ".sdkman", "candidates", "java"), jdks);
+            scanDirectory(Paths.get(home, ".jenv", "versions"), jdks);
+            
+            // Check /opt
+            scanDirectory(Paths.get("/opt"), jdks);
+            
+            // Check /usr/local
+            scanDirectory(Paths.get("/usr/local"), jdks);
+            
+            // Check /usr/java
+            scanDirectory(Paths.get("/usr/java"), jdks);
         }
         
         return jdks;
@@ -336,6 +393,35 @@ public class JdkDiscoveryImpl implements JdkDiscovery {
         
         // If no dot, return as-is (handle cases like "21")
         return version.split("[^0-9]")[0];
+    }
+    
+    /**
+     * Helper method to scan a directory recursively for JDK installations.
+     * Scans up to 3 levels deep to avoid excessive searching.
+     */
+    private void scanDirectory(Path directory, List<JdkInfo> jdks) {
+        scanDirectory(directory, jdks, 0, 3);
+    }
+    
+    private void scanDirectory(Path directory, List<JdkInfo> jdks, int currentDepth, int maxDepth) {
+        if (!Files.exists(directory) || !Files.isDirectory(directory) || currentDepth >= maxDepth) {
+            return;
+        }
+        
+        try (Stream<Path> paths = Files.list(directory)) {
+            paths.filter(Files::isDirectory)
+                .forEach(subDir -> {
+                    // First, try to parse this directory as a JDK
+                    parseJdkInfo(subDir).ifPresent(jdks::add);
+                    
+                    // Then recursively scan subdirectories
+                    if (currentDepth < maxDepth - 1) {
+                        scanDirectory(subDir, jdks, currentDepth + 1, maxDepth);
+                    }
+                });
+        } catch (IOException e) {
+            // Ignore directories we can't read
+        }
     }
 }
 

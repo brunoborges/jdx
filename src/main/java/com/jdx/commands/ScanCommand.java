@@ -1,39 +1,53 @@
 package com.jdx.commands;
 
+import com.jdx.catalog.JdkCatalog;
 import com.jdx.catalog.JdkCatalogImpl;
+import com.jdx.discovery.JdkDiscovery;
 import com.jdx.discovery.JdkDiscoveryImpl;
 import com.jdx.model.JdkInfo;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
-@Command(
-    name = "scan",
-    description = "Discover and catalog all JDKs on this machine"
-)
-public class ScanCommand implements Callable<Integer> {
-
+/**
+ * Command to scan the system for installed JDKs and save them to the catalog.
+ */
+@Command(name = "scan", description = "Scan for installed JDKs and update catalog")
+public class ScanCommand implements Runnable {
+    
+    @Option(names = {"--deep"}, description = "Perform deep scan, searching beyond standard JDK installation locations")
+    private boolean deep;
+    
+    private final JdkDiscovery discovery;
+    private final JdkCatalog catalog;
+    
+    public ScanCommand() {
+        this.discovery = new JdkDiscoveryImpl();
+        this.catalog = new JdkCatalogImpl();
+    }
+    
     @Override
-    public Integer call() throws Exception {
-        System.out.println("Scanning for JDKs...");
-
-        JdkDiscoveryImpl discovery = new JdkDiscoveryImpl();
-        List<JdkInfo> jdks = discovery.scan();
-
-        System.out.println("Found " + jdks.size() + " JDK(s)");
-
-        JdkCatalogImpl catalog = new JdkCatalogImpl();
+    public void run() {
+        System.out.println("Scanning for JDK installations" + (deep ? " (deep scan)..." : "..."));
+        
+        List<JdkInfo> jdks = deep ? discovery.deepScan() : discovery.scan();
+        
+        if (jdks.isEmpty()) {
+            System.out.println("No JDKs found.");
+            return;
+        }
+        
+        System.out.println("\nFound " + jdks.size() + " JDK(s):");
+        for (JdkInfo jdk : jdks) {
+            System.out.println("  - " + jdk.id() + ": " + jdk.version() + " (" + jdk.vendor() + ") at " + jdk.path());
+        }
+        
+        // Save to catalog
         for (JdkInfo jdk : jdks) {
             catalog.add(jdk);
-            System.out.println("  - " + jdk.version() + " (" + jdk.vendor() + ") at " + jdk.path());
         }
-
         catalog.save();
-
-        System.out.println("Scan complete. Found " + jdks.size() + " JDK(s).");
-        System.out.println("Run 'jdx list' to see details.");
-
-        return 0;
+        System.out.println("\nCatalog updated successfully.");
     }
 }
